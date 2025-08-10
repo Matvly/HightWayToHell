@@ -4,22 +4,26 @@ public class PlayerController : MonoBehaviour
 {
     public float speed = 5f;
     public float jumpForce = 5f;
-    public float rotationSpeed = 10f;
-    public Transform camera;
+    public float mouseSensitivity = 2f;
+    public Transform cameraHolder;
     public LayerMask groundLayer;
     public float groundCheckDistance = 0.1f;
+    public GameObject Hands;
 
     private Rigidbody rb;
     private bool isGrounded;
+    private float xRotation = 0f;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+        Cursor.lockState = CursorLockMode.Locked; 
     }
 
     private void Update()
     {
+        Look();
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             Jump();
@@ -30,18 +34,6 @@ public class PlayerController : MonoBehaviour
     {
         Move();
         CheckGround();
-
-
-        // Получаем текущий угол поворота игрока
-        float currentYAngle = transform.eulerAngles.y;
-
-        // Получаем горизонтальный угол камеры (только ось Y)
-        float targetYAngle = camera.eulerAngles.y;
-
-        // Плавно поворачиваем игрока к нужному углу
-        float newYAngle = Mathf.LerpAngle(currentYAngle, targetYAngle, rotationSpeed * Time.fixedDeltaTime);
-
-        transform.rotation = Quaternion.Euler(0f, newYAngle, 0f);
     }
 
     void Move()
@@ -49,18 +41,35 @@ public class PlayerController : MonoBehaviour
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 
-        Vector3 moveDirection = camera.forward * v + camera.right * h;
-        moveDirection.y = 0f;
-
-        rb.MovePosition(rb.position + moveDirection.normalized * speed * Time.deltaTime);
+        Vector3 moveDirection = transform.forward * v + transform.right * h;
+        rb.MovePosition(rb.position + moveDirection.normalized * speed * Time.fixedDeltaTime);
     }
+
     void Jump()
     {
-        rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z); 
+        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
-    private void CheckGround()
+    void CheckGround()
     {
         isGrounded = Physics.Raycast(transform.position, Vector3.down, groundCheckDistance + 0.5f, groundLayer);
+    }
+
+    void Look()
+    {
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
+        Hands.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+
+
+
+
+        transform.Rotate(Vector3.up * mouseX);
+
+       
+        xRotation -= mouseY;
+        xRotation = Mathf.Clamp(xRotation, -80f, 80f); 
+        cameraHolder.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
     }
 }
