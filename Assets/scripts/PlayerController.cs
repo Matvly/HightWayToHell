@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -18,12 +19,15 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
-        Cursor.lockState = CursorLockMode.Locked; 
+        Cursor.lockState = CursorLockMode.Locked;
+
+        StartCoroutine(HandsFollow());
     }
 
     private void Update()
     {
         Look();
+        ;   
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             Jump();
@@ -56,18 +60,32 @@ public class PlayerController : MonoBehaviour
         isGrounded = Physics.Raycast(transform.position, Vector3.down, groundCheckDistance + 0.5f, groundLayer);
     }
 
+    IEnumerator HandsFollow()
+    {
+        while (true)
+        {
+            yield return null;
+
+            float yRotate = Input.GetAxis("Vertical") * -5f;
+            
+            Quaternion targetRotation = Quaternion.Euler(xRotation, 0f, yRotate);
+
+            Hands.transform.localRotation = Quaternion.Lerp(
+                        Hands.transform.localRotation,
+                        targetRotation,
+                        Time.deltaTime * 5f
+                        );
+        }
+    }
+
     void Look()
     {
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
-        Hands.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-
-
-
+        
 
         transform.Rotate(Vector3.up * mouseX);
 
-       
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -80f, 80f); 
         cameraHolder.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
