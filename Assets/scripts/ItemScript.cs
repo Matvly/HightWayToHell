@@ -1,3 +1,4 @@
+using UnityEditor.Animations;
 using UnityEngine;
 
 public class ItemScript : MonoBehaviour
@@ -7,6 +8,9 @@ public class ItemScript : MonoBehaviour
     public Transform leftHand;
     public Transform hands;
     public float pickupRange = 2f;
+
+    private Animator anim;
+    private Animator anim2;
 
     [Header("Позиция и поворот для пистолета в руках")]
     public Vector3 pistolLocalPosition;
@@ -25,6 +29,12 @@ public class ItemScript : MonoBehaviour
     private Vector3 defRightHandRotation = new Vector3(356.253998f, 0f, 0f);
 
     private GameObject heldItem;
+
+    private void Start()
+    {
+        anim = leftHand.GetComponent<Animator>();
+        anim2 = rightHand.GetComponent<Animator>();
+    }
 
     private void Update()
     {
@@ -61,15 +71,20 @@ public class ItemScript : MonoBehaviour
 
                 if (hit.collider.CompareTag("Pistol"))
                 {
-                    // Настройка пистолета в руках
+
+
+                    
                     heldItem.transform.localPosition = pistolLocalPosition;
                     heldItem.transform.localEulerAngles = pistolLocalRotation;
+
+                    
 
                     // Настройка рук
                     leftHand.localPosition = leftHandLocalPosition;
                     rightHand.localPosition = defRightHandPos;
                     leftHand.localEulerAngles = leftHandLocalRotation;
                     rightHand.localEulerAngles = defRightHandRotation;
+
                 }
                 else
                 {
