@@ -9,8 +9,6 @@ public class ItemScript : MonoBehaviour
     public Transform hands;
     public float pickupRange = 2f;
 
-    private Animator anim;
-    private Animator anim2;
 
     [Header("ѕозици€ и поворот дл€ пистолета в руках")]
     public Vector3 pistolLocalPosition;
@@ -30,11 +28,7 @@ public class ItemScript : MonoBehaviour
 
     private GameObject heldItem;
 
-    private void Start()
-    {
-        anim = leftHand.GetComponent<Animator>();
-        anim2 = rightHand.GetComponent<Animator>();
-    }
+   
 
     private void Update()
     {
