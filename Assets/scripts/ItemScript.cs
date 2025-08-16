@@ -4,9 +4,7 @@ using UnityEngine;
 public class ItemScript : MonoBehaviour
 {
     public Transform cameraHolder;
-    public Transform rightHand;
-    public Transform leftHand;
-    public Transform hands;
+    public HandsController handsController;
     public float pickupRange = 2f;
 
 
@@ -61,12 +59,18 @@ public class ItemScript : MonoBehaviour
                     rb.detectCollisions = false;
                 }
 
-                heldItem.transform.SetParent(hands);
+                heldItem.transform.SetParent(handsController.transform);
 
                 if (hit.collider.CompareTag("Pistol"))
                 {
 
-
+                    HandsController controller = handsController.GetComponent<HandsController>();
+                    if (controller != null)
+                    {
+                        controller.Anim.SetTrigger("Start");
+                        Debug.Log("Loaded");
+                        
+                    }
                     
                     heldItem.transform.localPosition = pistolLocalPosition;
                     heldItem.transform.localEulerAngles = pistolLocalRotation;
@@ -74,10 +78,10 @@ public class ItemScript : MonoBehaviour
                     
 
                     // Настройка рук
-                    leftHand.localPosition = leftHandLocalPosition;
-                    rightHand.localPosition = defRightHandPos;
-                    leftHand.localEulerAngles = leftHandLocalRotation;
-                    rightHand.localEulerAngles = defRightHandRotation;
+                    handsController.LeftHand.localPosition = leftHandLocalPosition;
+                    handsController.RightHand.localPosition = defRightHandPos;
+                    handsController.LeftHand.localEulerAngles = leftHandLocalRotation;
+                    handsController.RightHand.localEulerAngles = defRightHandRotation;
 
                 }
                 else
@@ -104,10 +108,14 @@ public class ItemScript : MonoBehaviour
 
         heldItem = null;
 
-        // Сброс позиции рук (если нужно)
-        leftHand.localPosition = defLeftHandPos;
-        leftHand.localEulerAngles = defLeftHandRotation;
-        rightHand.localPosition = defRightHandPos;
-        rightHand.localEulerAngles = defRightHandRotation;
+        HandsController controller = handsController.GetComponent<HandsController>();
+        if (controller != null)
+        {
+            controller.Anim.SetTrigger("End");
+            Debug.Log("Ended");
+
+        }
+
+
     }
 }

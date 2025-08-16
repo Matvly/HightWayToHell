@@ -1,18 +1,24 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class HandsController : MonoBehaviour
 {
-    public Transform player;
-    public Transform hands;
-    public Vector3 offset;
+    [SerializeField]  private Animator anim;
+    [SerializeField]  private Transform leftHand;
+    [SerializeField] private Transform rightHand;
 
-    private void Update()
+    public Transform LeftHand => leftHand;
+    public Transform RightHand => rightHand;
+
+    public Animator Anim => anim;
+    
+    private void Start()
     {
-        hands.position = player.position + offset;
-
+        anim = leftHand.GetComponent<Animator>();
     }
 
-     
-
-
+    public void StartAnim()
+    {
+        anim.SetTrigger("Start");
+    }
 }
