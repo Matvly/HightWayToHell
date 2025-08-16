@@ -421,9 +421,9 @@ GameObject:
   - component: {fileID: 555037191}
   - component: {fileID: 555037193}
   - component: {fileID: 555037192}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Image
-  m_TagString: Untagged
+  m_TagString: MarkLayer
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -439,13 +439,14 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 925161409}
   m_Father: {fileID: 2069165090}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 2, y: 2}
+  m_SizeDelta: {x: 1, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &555037192
 MonoBehaviour:
@@ -607,7 +608,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1409890815}
-  - {fileID: 2069165090}
   - {fileID: 2116131172}
   m_Father: {fileID: 1506207882}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -821,9 +821,9 @@ GameObject:
   - component: {fileID: 925161409}
   - component: {fileID: 925161411}
   - component: {fileID: 925161410}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Image (1)
-  m_TagString: Untagged
+  m_TagString: MarkLayer
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -835,17 +835,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 925161408}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2069165090}
+  m_Father: {fileID: 555037191}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.04, y: 1.27}
-  m_SizeDelta: {x: 0.8568, y: 2}
+  m_AnchoredPosition: {x: 0.04, y: 0.68}
+  m_SizeDelta: {x: 0.4, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &925161410
 MonoBehaviour:
@@ -1091,7 +1091,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 63
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -1887,9 +1887,9 @@ GameObject:
   - component: {fileID: 2069165093}
   - component: {fileID: 2069165092}
   - component: {fileID: 2069165091}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: CanvasMark
-  m_TagString: Untagged
+  m_TagString: MarkLayer
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1901,18 +1901,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2069165089}
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 2.7700002}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 555037191}
-  - {fileID: 925161409}
-  m_Father: {fileID: 586061949}
+  m_Father: {fileID: 2116131172}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 4.3}
+  m_AnchoredPosition: {x: 0, y: -0}
   m_SizeDelta: {x: 2, y: 2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2069165091
@@ -1989,6 +1988,7 @@ GameObject:
   - component: {fileID: 2116131172}
   - component: {fileID: 2116131171}
   - component: {fileID: 2116131169}
+  - component: {fileID: 2116131173}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -2103,9 +2103,23 @@ Transform:
   m_LocalPosition: {x: 0, y: 7.07, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 2069165090}
   m_Father: {fileID: 586061949}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!114 &2116131173
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2116131168}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14a31e621c5a35d48ba5c9f2b20b9027, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Player: {fileID: 586061948}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
