@@ -10,5 +10,4 @@ public class WeaponData : ScriptableObject
 
     [Header("Снаряд")]
     public GameObject bulletPrefab;
-    public Transform shootPoint;
 }

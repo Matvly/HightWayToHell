@@ -78,10 +78,10 @@ public class ItemScript : MonoBehaviour
                     
 
                     // Настройка рук
-                    handsController.LeftHand.localPosition = leftHandLocalPosition;
-                    handsController.RightHand.localPosition = defRightHandPos;
-                    handsController.LeftHand.localEulerAngles = leftHandLocalRotation;
-                    handsController.RightHand.localEulerAngles = defRightHandRotation;
+                    handsController.MainLeftHand.localPosition = leftHandLocalPosition;
+                    handsController.MainRightHand.localPosition = defRightHandPos;
+                    handsController.MainLeftHand.localEulerAngles = leftHandLocalRotation;
+                    handsController.MainRightHand.localEulerAngles = defRightHandRotation;
 
                 }
                 else
