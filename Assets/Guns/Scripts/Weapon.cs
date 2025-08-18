@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
+    public HandsController Hands;
+    
     public WeaponData data;
     public Transform shootPoint;
 
@@ -35,6 +37,7 @@ public class Weapon : MonoBehaviour
         Vector3 dir = (targetPoint - shootPoint.position).normalized;
 
         GameObject bullet = Instantiate(data.bulletPrefab, shootPoint.position, Quaternion.identity);
+        Hands.HandsAnim.SetTrigger("Shoot");
         bullet.GetComponent<Rigidbody>().linearVelocity = dir * data.bulletSpeed;
        
         
