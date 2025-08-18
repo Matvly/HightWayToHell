@@ -5,6 +5,8 @@ public class Weapon : MonoBehaviour
     public WeaponData data;
     public Transform shootPoint;
 
+    public Camera playerCamera;
+
     private float nextFireTime = 0f;
     private void Update()
     {
@@ -17,16 +19,24 @@ public class Weapon : MonoBehaviour
 
     void Shoot()
     {
-        Camera cam = Camera.main;
 
-       
-        Vector3 direction = cam.transform.forward;
+        Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        Vector3 targetPoint;
 
-       
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            targetPoint = hit.point;
+        }
+        else
+        {
+            targetPoint = ray.GetPoint(1000f);
+        }
+
+        Vector3 dir = (targetPoint - shootPoint.position).normalized;
+
         GameObject bullet = Instantiate(data.bulletPrefab, shootPoint.position, Quaternion.identity);
-
+        bullet.GetComponent<Rigidbody>().linearVelocity = dir * data.bulletSpeed;
        
-        Rigidbody rb = bullet.GetComponent<Rigidbody>();
-        rb.linearVelocity = direction * data.bulletSpeed;
+        
     }
 }
