@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEditor.Build;
+using Unity.VisualScripting;
 
 public class Inventory : MonoBehaviour
 {
@@ -15,6 +16,39 @@ public class Inventory : MonoBehaviour
 
     public GameObject InventoryMainObject;
     public int maxCount;
+
+    public Camera cam;
+    public EventSystem es;
+
+    public int currentID;
+    public ItemInventory currentItem;
+
+    public RectTransform movingObj;
+    public Vector3 offset;
+
+    private void Start()
+    {
+        if (items.Count == 0)
+        {
+            AddGraphics();
+        }
+
+        for (int i = 0; i < maxCount; i++)
+        {
+            AddItem(i, data.items[Random.Range(0, data.items.Count)], Random.Range(1, 99));
+
+        }
+
+        UpdateInventory();
+    }
+
+    public void Update()
+    {
+        if (currentID != -1)
+        {
+            MoveObject();
+        }
+    }
 
     public void AddItem(int id, Item item, int count)
     {
@@ -65,8 +99,69 @@ public class Inventory : MonoBehaviour
             newItem.GetComponentInChildren<RectTransform>().localScale = new Vector3(1, 1, 1);
 
             Button tempButton = newItem.GetComponent<Button>();
+
+            tempButton.onClick.AddListener(delegate { SelectObject(); });
+
             items.Add(ii);
         }
+    }
+
+    public void UpdateInventory()
+    {
+        for (int i = 0; i < maxCount; i++)
+        {
+            if (items[i].id != 0 && items[i].count > 1)
+            {
+                items[i].itemGameObj.GetComponentInChildren<Text>().text = items[i].count.ToString();
+            }
+            else
+            {
+                items[i].itemGameObj.GetComponentInChildren<Text>().text = "";
+            }
+
+            items[i].itemGameObj.GetComponent<Image>().sprite = data.items[items[i].id].img;
+        }
+    }
+
+    
+    public void SelectObject()
+    {
+        if (currentID == -1)
+        {
+            currentID = int.Parse(es.currentSelectedGameObject.name);
+            currentItem = CopyInventoryItem(items[currentID]);
+            movingObj.gameObject.SetActive(true);
+            movingObj.GetComponent<Image>().sprite = data.items[currentItem.id].img;
+
+            AddItem(currentID, data.items[0], 0);
+        }
+        else
+        {
+            AddInventoryItem(currentID, items[int.Parse(es.currentSelectedGameObject.name)]);
+
+            AddInventoryItem(int.Parse(es.currentSelectedGameObject.name), currentItem);
+            currentID = -1;
+
+            movingObj.gameObject.SetActive(false);
+        }
+    }
+    
+    public void MoveObject()
+    {
+        Vector3 pos = Input.mousePosition + offset;
+        pos.z = InventoryMainObject.GetComponent<RectTransform>().position.z;
+        movingObj.position = cam.ScreenToWorldPoint(pos);
+    }
+
+    public ItemInventory CopyInventoryItem(ItemInventory old)
+    {
+        ItemInventory New = new ItemInventory();
+
+        New.id = old.id;
+        New.itemGameObj = old.itemGameObj;
+        New.count = old.count;
+
+        return New;
     }
 }
 
