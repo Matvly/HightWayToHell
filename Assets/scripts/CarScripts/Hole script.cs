@@ -13,12 +13,13 @@ public class Holescript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        Transform Tr = GetComponentInParent<Transform>();
         Collider cl = gameObject.GetComponent<Collider>();
-        if (transform.Find("screw") != null)
+        if (Tr.Find("screw") != null)
         {
 
-            transform.Find("screw").position = transform.position;
-            transform.Find("screw").rotation = transform.rotation;
+            Tr.Find("screw").position = transform.position;
+            Tr.Find("screw").rotation = transform.rotation;
 
 
             if (cl != null)

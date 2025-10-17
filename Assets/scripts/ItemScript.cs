@@ -1,5 +1,6 @@
 using Unity.VisualScripting;
 using UnityEditor.Animations;
+using UnityEditor.Build;
 using UnityEditor.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -9,10 +10,11 @@ public class ItemScript : MonoBehaviour
     public Transform cameraHolder;
     public HandsController handsController;
     public float pickupRange = 2f;
-
+    [Header("Голоограми")]
     public Material GologramMaterial;
-    
+    public Material GologramRedMaterial;
 
+    public GameObject GologramHolder;
     [Header("Позиция и поворот для пистолета в руках")]
     public Vector3 pistolLocalPosition;
     public Vector3 pistolLocalRotation;
@@ -33,8 +35,46 @@ public class ItemScript : MonoBehaviour
 
     private GameObject PartGologram;
 
+    private int Yrot = 0;
+    private int Xrot = 0;
+    private int Zrot = 0;
+
+    private bool Placeble = true;
+
+
+
+    private int CurrentScrew = 0;
     private void Update()
     {
+        
+
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            Yrot += 45;
+        }
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+            Xrot += 45;
+        }
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            Zrot += 45;
+        }
+
+
+
+
+        if (scroll > 0f)
+        {
+            CurrentScrew++;
+        }
+        else if (scroll < 0f)
+        {
+            CurrentScrew--;
+        }
+
         if (Input.GetKeyDown(KeyCode.E))
         {
             if (heldItem == null)
@@ -55,71 +95,131 @@ public class ItemScript : MonoBehaviour
                 {
                     Aply();
                 }
+                else if (heldItem.CompareTag("Part") && Placeble)
+                {
+                    AplyPart();
+                }
             }
 
         }
-        if (PartGologram != null)
+
+
+
+        if (PartGologram == null && heldItem != null && heldItem.CompareTag("Part"))
         {
-            PartGologram.transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
-            PartGologram.transform.position = heldItem.transform.position;
+            //, hit.transform.position, heldItem.transform.rotation
+            PartGologram = Instantiate(heldItem);
+            
+
+
+
+           
+            
+            foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
+            {
+                if (renderer != null)
+                {
+                    renderer.material = GologramMaterial;
+                }
+
+            }
+            var rb = PartGologram.GetComponent<Rigidbody>();
+            rb.detectCollisions = false;
 
         }
-            if (heldItem != null)
+        if (PartGologram != null) 
+        {
+
+
+            //if (PartGologram.GetComponent<GologramScript>().Colliding)
+            //{
+            //    foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
+            //    {
+            //        if (renderer != null)
+            //        {
+            //            renderer.material = GologramRedMaterial;
+            //        }
+
+            //    }
+            //    Placeble = false;
+            //}
+            //else
+            //{
+            //    Debug.Log("No");
+            //    foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
+            //    {
+            //        if (renderer != null)
+            //        {
+            //            renderer.material = GologramMaterial;
+            //        }
+
+            //    }
+            //    Placeble = true;
+            //}
+
+
+        }
+        if (heldItem != null)
         {
             if (heldItem.CompareTag("Part"))
             {
                 Ray ray = new Ray(cameraHolder.position, cameraHolder.forward);
                 if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
                 {
+                    
                     if (PartGologram == null)
                     {
-                        //, hit.transform.position, heldItem.transform.rotation
-                        PartGologram = Instantiate(heldItem);
+                        ////, hit.transform.position, heldItem.transform.rotation
+                        //PartGologram = Instantiate(heldItem);
 
 
-                        
-                        foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
-                        {
-                            if (renderer != null)
-                            {
-                                renderer.material = GologramMaterial;
-                            }
-                            
-                        }
-                        foreach (Collider collider in PartGologram.GetComponents<Collider>())
-                        {
-                            if (collider != null)
-                            {
-                                collider.enabled = false;
-                            }
 
-                        }
-                        foreach (Collider collider in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Collider>())
-                        {
-                            if (collider != null)
-                            {
-                                collider.enabled = false;
-                            }
+                        //foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
+                        //{
+                        //    if (renderer != null)
+                        //    {
+                        //        renderer.material = GologramMaterial;
+                        //    }
 
-                        }
-                        foreach (Collider collider in PartGologram.transform.GetComponentsInChildren<Collider>())
-                        {
-                            if (collider != null)
-                            {
-                                collider.enabled = false;
-                            }
+                        //}
+                        //var rb = PartGologram.GetComponent<Rigidbody>();
+                        //rb.detectCollisions = false;
 
-                        }
+
+
 
 
 
                     }
                     else
                     {
-                        
+                        if (hit.collider.CompareTag("screw"))
+                        {
+
+                            if (CurrentScrew >= PartGologram.GetComponent<Partscript>().Holes.Length) { CurrentScrew = 0; }
+
+                            if (CurrentScrew < 0) { CurrentScrew = PartGologram.GetComponent<Partscript>().Holes.Length - 1; }
+
+                            Vector3 Offset = PartGologram.transform.position - PartGologram.GetComponent<Partscript>().Holes[CurrentScrew].transform.position;
+                            PartGologram.transform.position = hit.collider.GetComponent<Transform>().position + Offset;
+                            PartGologram.transform.rotation = hit.collider.GetComponent<Transform>().rotation * Quaternion.Euler(Xrot, Yrot, Zrot);
+                            //PartGologram.GetComponent<Partscript>().Holes[CurrentScrew].transform.position;
+
+                        }
+                       
+                        else
+                        {
+                            PartGologram.transform.position = hit.point;
+                            PartGologram.transform.rotation = Quaternion.Euler(Xrot, Yrot, Zrot);
+                        }
                         //PartGologram.transform.position = Vector3.forward * 1f - new Vector3(0f, 0.3f, 0f);
 
                     }
+                }
+                else if (PartGologram != null)
+                {
+                    PartGologram.transform.position = GologramHolder.transform.position;
+                    PartGologram.transform.rotation = Quaternion.Euler(Xrot, Yrot, Zrot);
                 }
             }
         }
@@ -138,7 +238,7 @@ public class ItemScript : MonoBehaviour
                     if (rb == null && hit.collider.CompareTag("screw"))
 
                     {
-
+                        Debug.Log("Yeaah");
                         hit.collider.AddComponent<Rigidbody>();
                         rb = heldItem.GetComponent<Rigidbody>();
                     }
@@ -229,7 +329,7 @@ public class ItemScript : MonoBehaviour
                 if (hit.collider.CompareTag("hole"))
                 {
 
-                    heldItem.transform.SetParent(hit.collider.gameObject.transform);
+                    heldItem.transform.SetParent(hit.collider.gameObject.GetComponentInParent<Transform>());
                     heldItem.transform.position = hit.collider.transform.position;
                     heldItem.transform.rotation = hit.collider.transform.rotation;
                     Rigidbody rb = heldItem.GetComponent<Rigidbody>();
@@ -264,6 +364,39 @@ public class ItemScript : MonoBehaviour
 
                 }
             }
+        }
+
+        void AplyPart()
+        {
+            
+            heldItem.transform.SetParent(null);
+
+            Rigidbody rb = heldItem.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.isKinematic = false;
+                rb.detectCollisions = true;
+                heldItem.transform.position = PartGologram.transform.position;
+                heldItem.transform.rotation = PartGologram.transform.rotation;
+            }
+            Destroy(PartGologram);
+            PartGologram = null;
+            heldItem = null;
+
+            HandsController controller = handsController.GetComponent<HandsController>();
+            if (controller != null)
+            {
+                controller.Anim.SetTrigger("End");
+                Debug.Log("Ended");
+
+            }
+
+
+
+
+
+
+       
         }
     }
 }
