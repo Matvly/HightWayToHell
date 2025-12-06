@@ -7,6 +7,8 @@ public class Weapon : MonoBehaviour
     public WeaponData data;
     public Transform shootPoint;
 
+    public Transform rayTracer;
+
     public Camera playerCamera;
 
     private float nextFireTime = 0f;
@@ -26,10 +28,16 @@ public class Weapon : MonoBehaviour
     {
         if (data.bulletPrefab != null && shootPoint != null)
         {
-            Instantiate(data.bulletPrefab, shootPoint.position, shootPoint.rotation);
-
-            
-            Hands.HandsAnim.SetTrigger("Shoot");
+            var p = Instantiate(data.bulletPrefab, shootPoint.position, shootPoint.rotation);
+            Ray ray = new Ray(rayTracer.position, rayTracer.forward);
+            if (Physics.Raycast(ray, out RaycastHit hit, 9999f))
+            {
+                
+                p.transform.LookAt(hit.point);
+            }
+            Hands.HandsAnim.Play("PistolShootAnim");
+            //Hands.HandsAnim.StopPlayback();
+            //Hands.HandsAnim.SetTrigger("Shoot");
         }
     }
     //void Shoot()

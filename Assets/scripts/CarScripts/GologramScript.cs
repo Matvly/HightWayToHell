@@ -1,16 +1,53 @@
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GologramScript : MonoBehaviour
 {
-    public bool Colliding = false;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void OnTriggerEnter(Collider other)
+    [SerializeField] private GameObject[] holes;
+
+    private List<GameObject> intersections = new();
+    public GameObject[] Holes => holes;
+
+    public Action<GameObject> OnEnterCallback { get; set; }
+    public Action<GameObject> OnExitCallback { get; set; }
+
+    public void OnTriggerEnter(Collider other)
     {
-        Colliding = true;
+
+
+        if (!intersections.Contains(other.gameObject))
+        {
+            intersections.Add(other.gameObject);
+        }
     }
 
-    void OnTriggerExit(Collider other)
+    public void OnTriggerExit(Collider other)
     {
-        Colliding = false;
+        if (intersections.Contains(other.gameObject))
+        {
+            intersections.Remove(other.gameObject);
+        }
     }
+
+    public bool GetPermissonToPlace()
+    {
+
+        
+        foreach (GameObject part in intersections)
+        {
+            Debug.Log(part);
+            if (part.tag != "Hands" && part.tag != "screw" && part.tag != "Meshes" && part.tag != "hole")
+            {
+                
+                return false;
+            }
+        }
+        
+        return true;
+
+    }
+
+
 }

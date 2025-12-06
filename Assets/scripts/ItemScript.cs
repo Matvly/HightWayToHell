@@ -7,14 +7,16 @@ using UnityEngine.UIElements;
 
 public class ItemScript : MonoBehaviour
 {
+    public Camera playerCamera;
     public Transform cameraHolder;
     public HandsController handsController;
     public float pickupRange = 2f;
     [Header("Голоограми")]
     public Material GologramMaterial;
     public Material GologramRedMaterial;
-
     public GameObject GologramHolder;
+
+
     [Header("Позиция и поворот для пистолета в руках")]
     public Vector3 pistolLocalPosition;
     public Vector3 pistolLocalRotation;
@@ -34,6 +36,10 @@ public class ItemScript : MonoBehaviour
     private GameObject heldItem;
 
     private GameObject PartGologram;
+
+    private Transform HoveredScrew;
+
+    private Collider HoveredScrewCollider;
 
     private int Yrot = 0;
     private int Xrot = 0;
@@ -130,32 +136,32 @@ public class ItemScript : MonoBehaviour
         if (PartGologram != null) 
         {
 
+            
+            if (!PartGologram.GetComponent<GologramScript>().GetPermissonToPlace())
+            {
+                foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
+                {
+                    if (renderer != null)
+                    {
+                        renderer.material = GologramRedMaterial;
+                    }
 
-            //if (PartGologram.GetComponent<GologramScript>().Colliding)
-            //{
-            //    foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
-            //    {
-            //        if (renderer != null)
-            //        {
-            //            renderer.material = GologramRedMaterial;
-            //        }
+                }
+                Placeble = false;
+            }
+            else
+            {
+                
+                foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
+                {
+                    if (renderer != null)
+                    {
+                        renderer.material = GologramMaterial;
+                    }
 
-            //    }
-            //    Placeble = false;
-            //}
-            //else
-            //{
-            //    Debug.Log("No");
-            //    foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
-            //    {
-            //        if (renderer != null)
-            //        {
-            //            renderer.material = GologramMaterial;
-            //        }
-
-            //    }
-            //    Placeble = true;
-            //}
+                }
+                Placeble = true;
+            }
 
 
         }
@@ -204,7 +210,8 @@ public class ItemScript : MonoBehaviour
                             PartGologram.transform.position = hit.collider.GetComponent<Transform>().position + Offset;
                             PartGologram.transform.rotation = hit.collider.GetComponent<Transform>().rotation * Quaternion.Euler(Xrot, Yrot, Zrot);
                             //PartGologram.GetComponent<Partscript>().Holes[CurrentScrew].transform.position;
-
+                            HoveredScrew = hit.collider.transform;
+                            
                         }
                        
                         else
@@ -229,6 +236,7 @@ public class ItemScript : MonoBehaviour
             Ray ray = new Ray(cameraHolder.position, cameraHolder.forward);
             if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
             {
+                Debug.Log(hit.transform);
                 if (hit.collider.CompareTag("Item") || hit.collider.CompareTag("Pistol") || hit.collider.CompareTag("screw") || hit.collider.CompareTag("Part"))
                 {
 
@@ -251,10 +259,12 @@ public class ItemScript : MonoBehaviour
 
                     heldItem.transform.SetParent(handsController.transform);
 
-                    if (hit.collider.CompareTag("Pistol"))
+                    if (hit.collider.CompareTag("Pistol") || hit.transform.CompareTag("Pistol"))
                     {
-
+                        
                         HandsController controller = handsController.GetComponent<HandsController>();
+                        hit.collider.GetComponent<Weapon>().Hands = controller;
+                        hit.collider.GetComponent<Weapon>().playerCamera = playerCamera;
                         if (controller != null)
                         {
                             controller.Anim.SetTrigger("Start");
@@ -280,6 +290,7 @@ public class ItemScript : MonoBehaviour
 
                         heldItem.transform.localRotation = Quaternion.identity;
 
+                        heldItem.AddComponent<GologramScript>();
 
                         // Настройка рук
 
@@ -296,6 +307,10 @@ public class ItemScript : MonoBehaviour
 
         void Drop()
         {
+            if (heldItem.GetComponent<GologramScript>() != null)
+            {
+                Destroy(heldItem.GetComponent<GologramScript>());
+            }
             Destroy(PartGologram);
             PartGologram = null;
             heldItem.transform.SetParent(null);
@@ -374,10 +389,27 @@ public class ItemScript : MonoBehaviour
             Rigidbody rb = heldItem.GetComponent<Rigidbody>();
             if (rb != null)
             {
-                rb.isKinematic = false;
+                if (HoveredScrew == null)
+                {
+                    rb.isKinematic = false;
+
+                }
+               
+               
+
+                //HoveredScrew.GetComponent<Collider>().isTrigger = true;
+
                 rb.detectCollisions = true;
                 heldItem.transform.position = PartGologram.transform.position;
                 heldItem.transform.rotation = PartGologram.transform.rotation;
+                heldItem.transform.SetParent(HoveredScrew);
+                
+                HoveredScrew = null;
+
+            }
+            if (heldItem.GetComponent<GologramScript>() != null)
+            {
+                Destroy(heldItem.GetComponent<GologramScript>());
             }
             Destroy(PartGologram);
             PartGologram = null;
@@ -390,13 +422,13 @@ public class ItemScript : MonoBehaviour
                 Debug.Log("Ended");
 
             }
+            
+            
 
 
 
 
 
-
-       
         }
     }
 }

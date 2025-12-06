@@ -12,6 +12,7 @@ TagManager:
   - hole
   - screw
   - Part
+  - Meshes
   layers:
   - Default
   - TransparentFX
@@ -21,7 +22,7 @@ TagManager:
   - UI
   - MarkLayer
   - Holes
-  - 
+  - PistolsHitbox
   - 
   - 
   - 
