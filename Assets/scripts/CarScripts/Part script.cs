@@ -7,6 +7,7 @@ public class Partscript : MonoBehaviour
 {
     [SerializeField] private GameObject[] holes;
     [SerializeField] private float health;
+    [SerializeField] private float maxHealth;
     [SerializeField] private GameObject collisionReflex;
 
     public GameObject[] Holes => holes;
@@ -17,6 +18,19 @@ public class Partscript : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         
+    }
+
+    private void Update()
+    {
+        foreach (Renderer renderer in gameObject.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
+        {
+            if (renderer != null)
+            {
+                renderer.material.SetFloat("_BumpScale", maxHealth / health - 1);
+            }
+
+        }
+
     }
 
     private void OnCollisionEnter(Collision collision)
