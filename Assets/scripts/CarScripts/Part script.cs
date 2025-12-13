@@ -30,12 +30,12 @@ public class Partscript : MonoBehaviour
             }
 
         }
-
+        rb = GetComponent<Rigidbody>();
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.transform.GetComponent<Rigidbody>() != null)
+        if (collision.transform.GetComponent<Rigidbody>() != null && rb != null)
         {
             if (rb.linearVelocity.magnitude + collision.transform.GetComponent<Rigidbody>().linearVelocity.magnitude >= 2)
             {

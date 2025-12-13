@@ -241,8 +241,13 @@ public class ItemScript : MonoBehaviour
                 {
 
                     heldItem = hit.collider.gameObject;
-
+                    
                     Rigidbody rb = heldItem.GetComponent<Rigidbody>();
+                    if (rb == null && hit.collider.CompareTag("Part"))
+                    {
+                        hit.collider.AddComponent<Rigidbody>();
+                        rb = heldItem.GetComponent<Rigidbody>();
+                    }
                     if (rb == null && hit.collider.CompareTag("screw"))
 
                     {
@@ -356,6 +361,7 @@ public class ItemScript : MonoBehaviour
                         //rb.isKinematic = false;
                         Destroy(rb);
                     }
+
                     //if (rbHit != null)
                     //{
                     //    rbHit.enabled = false;
@@ -394,8 +400,17 @@ public class ItemScript : MonoBehaviour
                     rb.isKinematic = false;
 
                 }
-               
-               
+                else
+                {
+                    
+                    Destroy(rb);
+                    //Destroy(heldItem.GetComponent<Partscript>());
+                }
+
+                
+
+
+                
 
                 //HoveredScrew.GetComponent<Collider>().isTrigger = true;
 
