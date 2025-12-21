@@ -7,6 +7,11 @@ using UnityEngine.UIElements;
 
 public class ItemScript : MonoBehaviour
 {
+    public static ItemScript Instance;
+
+    public GameObject pickupHintUI;
+    private GameObject nearbyItem;
+
     public Camera playerCamera;
     public Transform cameraHolder;
     public HandsController handsController;
@@ -50,9 +55,14 @@ public class ItemScript : MonoBehaviour
 
 
     private int CurrentScrew = 0;
+
+    public void Awake()
+    {
+        Instance = this;
+    }
     private void Update()
     {
-        
+
 
         float scroll = Input.GetAxis("Mouse ScrollWheel");
 
@@ -83,8 +93,10 @@ public class ItemScript : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if (heldItem == null)
-                Pickup();
+            if (heldItem == null && nearbyItem != null)
+            {
+                PickupFromTrigger(nearbyItem);
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.G))
@@ -115,12 +127,12 @@ public class ItemScript : MonoBehaviour
         {
             //, hit.transform.position, heldItem.transform.rotation
             PartGologram = Instantiate(heldItem);
-            
 
 
 
-           
-            
+
+
+
             foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
             {
                 if (renderer != null)
@@ -133,10 +145,10 @@ public class ItemScript : MonoBehaviour
             rb.detectCollisions = false;
 
         }
-        if (PartGologram != null) 
+        if (PartGologram != null)
         {
 
-            
+
             if (!PartGologram.GetComponent<GologramScript>().GetPermissonToPlace())
             {
                 foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
@@ -151,7 +163,7 @@ public class ItemScript : MonoBehaviour
             }
             else
             {
-                
+
                 foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
                 {
                     if (renderer != null)
@@ -172,7 +184,7 @@ public class ItemScript : MonoBehaviour
                 Ray ray = new Ray(cameraHolder.position, cameraHolder.forward);
                 if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
                 {
-                    
+
                     if (PartGologram == null)
                     {
                         ////, hit.transform.position, heldItem.transform.rotation
@@ -211,9 +223,9 @@ public class ItemScript : MonoBehaviour
                             PartGologram.transform.rotation = hit.collider.GetComponent<Transform>().rotation * Quaternion.Euler(Xrot, Yrot, Zrot);
                             //PartGologram.GetComponent<Partscript>().Holes[CurrentScrew].transform.position;
                             HoveredScrew = hit.collider.transform;
-                            
+
                         }
-                       
+
                         else
                         {
                             PartGologram.transform.position = hit.point;
@@ -241,7 +253,7 @@ public class ItemScript : MonoBehaviour
                 {
 
                     heldItem = hit.collider.gameObject;
-                    
+
                     Rigidbody rb = heldItem.GetComponent<Rigidbody>();
                     if (rb == null && hit.collider.CompareTag("Part"))
                     {
@@ -266,7 +278,7 @@ public class ItemScript : MonoBehaviour
 
                     if (hit.collider.CompareTag("Pistol") || hit.transform.CompareTag("Pistol"))
                     {
-                        
+
                         HandsController controller = handsController.GetComponent<HandsController>();
                         hit.collider.GetComponent<Weapon>().Hands = controller;
                         hit.collider.GetComponent<Weapon>().playerCamera = playerCamera;
@@ -284,9 +296,9 @@ public class ItemScript : MonoBehaviour
 
                         // Настройка рук
                         handsController.MainLeftHand.localPosition = leftHandLocalPosition;
-                        handsController.MainRightHand.localPosition = defRightHandPos;
+                        handsController.MainRightHand.localPosition = rightHandLocalPosition;
                         handsController.MainLeftHand.localEulerAngles = leftHandLocalRotation;
-                        handsController.MainRightHand.localEulerAngles = defRightHandRotation;
+                        handsController.MainRightHand.localEulerAngles = rightHandLocalRotation;
 
                     }
                     else if (hit.collider.CompareTag("Part"))
@@ -327,6 +339,12 @@ public class ItemScript : MonoBehaviour
                 rb.detectCollisions = true;
                 rb.AddForce(cameraHolder.forward * 6f, ForceMode.Impulse);
             }
+
+            handsController.MainLeftHand.localPosition = defLeftHandPos;
+            handsController.MainRightHand.localPosition = defRightHandPos;
+
+            handsController.MainLeftHand.localEulerAngles = defLeftHandRotation;
+            handsController.MainRightHand.localEulerAngles = defRightHandRotation;
 
             heldItem = null;
 
@@ -389,7 +407,7 @@ public class ItemScript : MonoBehaviour
 
         void AplyPart()
         {
-            
+
             heldItem.transform.SetParent(null);
 
             Rigidbody rb = heldItem.GetComponent<Rigidbody>();
@@ -402,15 +420,15 @@ public class ItemScript : MonoBehaviour
                 }
                 else
                 {
-                    
+
                     Destroy(rb);
                     //Destroy(heldItem.GetComponent<Partscript>());
                 }
 
-                
 
 
-                
+
+
 
                 //HoveredScrew.GetComponent<Collider>().isTrigger = true;
 
@@ -418,7 +436,7 @@ public class ItemScript : MonoBehaviour
                 heldItem.transform.position = PartGologram.transform.position;
                 heldItem.transform.rotation = PartGologram.transform.rotation;
                 heldItem.transform.SetParent(HoveredScrew);
-                
+
                 HoveredScrew = null;
 
             }
@@ -437,13 +455,63 @@ public class ItemScript : MonoBehaviour
                 Debug.Log("Ended");
 
             }
-            
-            
-
-
-
-
 
         }
     }
+
+        public void SetNearbyItem(GameObject item)
+    {
+        nearbyItem = item;
+        pickupHintUI.SetActive(true);
+    }
+
+    public void ClearNearbyItem(GameObject item)
+    {
+        if (nearbyItem == item)
+        {
+            nearbyItem = null;
+            pickupHintUI.SetActive(false);
+        }
+    }
+
+    void PickupFromTrigger(GameObject item)
+    {
+        heldItem = item;
+
+        Rigidbody rb = heldItem.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.detectCollisions = false;
+        }
+
+        heldItem.transform.SetParent(handsController.transform);
+
+        if (heldItem.CompareTag("Pistol"))
+        {
+            HandsController controller = handsController;
+
+            Weapon weapon = heldItem.GetComponent<Weapon>();
+            weapon.Hands = controller;
+            weapon.playerCamera = playerCamera;
+
+            controller.Anim.SetTrigger("Start");
+
+            // позиция оружия
+            heldItem.transform.localPosition = pistolLocalPosition;
+            heldItem.transform.localEulerAngles = pistolLocalRotation;
+
+            // позиция рук (ОБЯЗАТЕЛЬНО)
+            handsController.MainLeftHand.localPosition = leftHandLocalPosition;
+            handsController.MainRightHand.localPosition = rightHandLocalPosition;
+
+            handsController.MainLeftHand.localEulerAngles = leftHandLocalRotation;
+            handsController.MainRightHand.localEulerAngles = rightHandLocalRotation;
+        }
+
+
+        pickupHintUI.SetActive(false);
+        nearbyItem = null;
+    }
+
 }
