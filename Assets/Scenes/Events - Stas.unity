@@ -1023,6 +1023,7 @@ MonoBehaviour:
   MainLefthand: {fileID: 721561162}
   MainRighthand: {fileID: 77347046}
   hands: {fileID: 2108907656}
+  WeaponAnchor: {fileID: 0}
 --- !u!1 &820264594
 GameObject:
   m_ObjectHideFlags: 0
@@ -1323,13 +1324,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1072694470}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.000000059604638, y: -0, z: -0, w: -1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0.000000052154068, y: -0.0031575842, z: 3.4197004e-10, w: -0.99999505}
+  m_LocalPosition: {x: -0.109, y: 0.033, z: 0.019}
   m_LocalScale: {x: 0.16991621, y: 0.14468001, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 721561162}
-  m_LocalEulerAnglesHint: {x: -3.746, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0.362, z: 0}
 --- !u!65 &1072694472
 BoxCollider:
   m_ObjectHideFlags: 0

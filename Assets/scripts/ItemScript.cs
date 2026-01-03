@@ -121,7 +121,17 @@ public class ItemScript : MonoBehaviour
 
         }
 
+        void LateUpdate()
+        {
+            if (heldItem != null && heldItem.CompareTag("Pistol"))
+            {
+                handsController.MainLeftHand.localPosition = leftHandLocalPosition;
+                handsController.MainRightHand.localPosition = rightHandLocalPosition;
 
+                handsController.MainLeftHand.localEulerAngles = leftHandLocalRotation;
+                handsController.MainRightHand.localEulerAngles = rightHandLocalRotation;
+            }
+        }
 
         if (PartGologram == null && heldItem != null && heldItem.CompareTag("Part"))
         {
