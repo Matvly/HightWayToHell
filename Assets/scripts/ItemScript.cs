@@ -4,12 +4,15 @@ using UnityEditor.Build;
 using UnityEditor.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
+using DG.Tweening;
 
 public class ItemScript : MonoBehaviour
 {
     public static ItemScript Instance;
 
     public GameObject pickupHintUI;
+    private CanvasGroup pickupCG;
+    private Tween fadeTween;
     private GameObject nearbyItem;
 
     public Camera playerCamera;
@@ -59,6 +62,15 @@ public class ItemScript : MonoBehaviour
     public void Awake()
     {
         Instance = this;
+
+       
+    }
+
+    private void Start()
+    {
+        pickupCG = pickupHintUI.GetComponent<CanvasGroup>();
+
+        pickupCG.alpha = 0f;
     }
     private void Update()
     {
@@ -332,6 +344,25 @@ public class ItemScript : MonoBehaviour
             }
         }
 
+   void CheckForPickupAfterDrop()
+{
+    Ray ray = new Ray(cameraHolder.position, cameraHolder.forward);
+
+    if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
+    {
+        if (hit.collider.CompareTag("Item") ||
+            hit.collider.CompareTag("Pistol") ||
+            hit.collider.CompareTag("screw") ||
+            hit.collider.CompareTag("Part"))
+        {
+            SetNearbyItem(hit.collider.gameObject);
+            return;
+        }
+    }
+
+    HidePickupHint();
+}
+
         void Drop()
         {
             if (heldItem.GetComponent<GologramScript>() != null)
@@ -365,7 +396,7 @@ public class ItemScript : MonoBehaviour
                 Debug.Log("Ended");
 
             }
-
+            CheckForPickupAfterDrop();
 
         }
 
@@ -469,10 +500,33 @@ public class ItemScript : MonoBehaviour
         }
     }
 
-        public void SetNearbyItem(GameObject item)
+    void ShowPickupHint()
+    {
+        pickupHintUI.SetActive(true);
+
+        fadeTween?.Kill();
+        pickupCG.alpha = 0f;
+
+        fadeTween = pickupCG.DOFade(1f, 0.75f);
+    }
+
+    void HidePickupHint()
+    {
+        fadeTween?.Kill();
+
+        fadeTween = pickupCG
+            .DOFade(0f, 0.75f)
+            .OnComplete(() =>
+            {
+                pickupHintUI.SetActive(false);
+            });
+    }
+
+    public void SetNearbyItem(GameObject item)
     {
         nearbyItem = item;
-        pickupHintUI.SetActive(true);
+
+        ShowPickupHint();
     }
 
     public void ClearNearbyItem(GameObject item)
@@ -480,7 +534,8 @@ public class ItemScript : MonoBehaviour
         if (nearbyItem == item)
         {
             nearbyItem = null;
-            pickupHintUI.SetActive(false);
+
+            HidePickupHint();
         }
     }
 
