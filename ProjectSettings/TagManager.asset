@@ -13,6 +13,9 @@ TagManager:
   - screw
   - Part
   - Meshes
+  - Wire
+  - Connector
+  - Unlined
   layers:
   - Default
   - TransparentFX

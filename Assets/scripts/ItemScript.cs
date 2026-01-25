@@ -4,13 +4,24 @@ using UnityEditor.Build;
 using UnityEditor.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
+using TMPro;
+using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class ItemScript : MonoBehaviour
 {
+    private Vector3 WirePointA = Vector3.zero;
+    private Vector3 WirePointB = Vector3.zero;
+
+    private GameObject helderA;
+    private GameObject helderB;
+
     public Camera playerCamera;
     public Transform cameraHolder;
     public HandsController handsController;
     public float pickupRange = 2f;
+
+    public TextMeshProUGUI ItemStateText;
     [Header("Голоограми")]
     public Material GologramMaterial;
     public Material GologramRedMaterial;
@@ -47,14 +58,116 @@ public class ItemScript : MonoBehaviour
 
     private bool Placeble = true;
 
+    private GameObject currentTarget;
 
 
     private int CurrentScrew = 0;
     private void Update()
     {
+
+
+
+
+
+        Ray OutlineRay = new Ray(cameraHolder.position, cameraHolder.forward);
+        RaycastHit OutlineHit;
+
+        if (Physics.Raycast(OutlineRay, out OutlineHit, pickupRange-0.5f))
+        {
+            GameObject target = OutlineHit.collider.gameObject;
+            bool Doing = true;
+
+            if (target.transform.parent != null)
+            {
+                if (target.transform.parent.parent != null)
+                {
+                    if (target.transform.parent.parent.CompareTag("Unlined"))
+                    {
+                        Doing = false;
+                    }
+
+                }
+            } 
+            // Якщо новий об’єкт
+            if (currentTarget != target && !target.CompareTag("Unlined") && Doing && !target.CompareTag("Part"))
+            {
+                
+                
+
+                if (currentTarget != null)
+                {
+                    Outline oldOutline = currentTarget.GetComponent<Outline>();
+                    if (oldOutline != null) Destroy(oldOutline);
+                }
+
+                // Додаємо обводку новому
+                Outline outline = target.AddComponent<Outline>();
+                outline.OutlineColor = Color.black;
+                outline.OutlineWidth = 5;
+                outline.OutlineMode = Outline.Mode.OutlineAll;
+
+
+                currentTarget = target;
+                // Прибираємо обводку з попереднього
+
+            }
+        }
+        else
+        {
+            // Якщо нічого не влучило — прибираємо обводку
+            if (currentTarget != null)
+            {
+                Outline oldOutline = currentTarget.GetComponent<Outline>();
+                if (oldOutline != null) Destroy(oldOutline);
+                currentTarget = null;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        ItemStateText.text = "";
+        Ray InfoRay = new Ray(cameraHolder.position, cameraHolder.forward);
+        if (Physics.Raycast(InfoRay, out RaycastHit InfoHit, pickupRange))
+        {
+            if (InfoHit.transform.GetComponent<Engine>())
+            {
+                string TextToDisplay = "";
+                foreach (KeyValuePair<string, float> fluid in InfoHit.transform.GetComponent<Engine>().Fluids)
+                {
+                    TextToDisplay = TextToDisplay + fluid.Key.ToString() + ": " + fluid.Value.ToString() + "\n";
+                }
+                ItemStateText.text = TextToDisplay;
+            }
+            else if(InfoHit.transform.GetComponent<Bucket>())
+            {
+                string TextToDisplay = "";
+                foreach (KeyValuePair<string, float> fluid in InfoHit.transform.GetComponent<Bucket>().Fluids)
+                {
+                    TextToDisplay = TextToDisplay + fluid.Key.ToString() + ": " + fluid.Value.ToString() + "\n";
+                }
+                ItemStateText.text = TextToDisplay;
+            }
+            
+        }
         
 
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
+            float scroll = Input.GetAxis("Mouse ScrollWheel");
 
         if (Input.GetKeyDown(KeyCode.Y))
         {
@@ -115,12 +228,19 @@ public class ItemScript : MonoBehaviour
         {
             //, hit.transform.position, heldItem.transform.rotation
             PartGologram = Instantiate(heldItem);
-            
+
+            foreach (Collider collider in PartGologram.GetComponents<Collider>())
+            {
+                if (collider != null)
+                {
+                    collider.isTrigger = true;
+                }
+
+            }
 
 
 
-           
-            
+
             foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
             {
                 if (renderer != null)
@@ -149,9 +269,10 @@ public class ItemScript : MonoBehaviour
                 }
                 Placeble = false;
             }
+            
             else
             {
-                
+
                 foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
                 {
                     if (renderer != null)
@@ -165,6 +286,10 @@ public class ItemScript : MonoBehaviour
 
 
         }
+        if (PartGologram != null)
+        {
+            PartGologram.transform.tag = "Unlined";
+        }
         if (heldItem != null)
         {
             if (heldItem.CompareTag("Part"))
@@ -172,7 +297,7 @@ public class ItemScript : MonoBehaviour
                 Ray ray = new Ray(cameraHolder.position, cameraHolder.forward);
                 if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
                 {
-                    
+
                     if (PartGologram == null)
                     {
                         ////, hit.transform.position, heldItem.transform.rotation
@@ -211,9 +336,9 @@ public class ItemScript : MonoBehaviour
                             PartGologram.transform.rotation = hit.collider.GetComponent<Transform>().rotation * Quaternion.Euler(Xrot, Yrot, Zrot);
                             //PartGologram.GetComponent<Partscript>().Holes[CurrentScrew].transform.position;
                             HoveredScrew = hit.collider.transform;
-                            
+
                         }
-                       
+
                         else
                         {
                             PartGologram.transform.position = hit.point;
@@ -225,8 +350,80 @@ public class ItemScript : MonoBehaviour
                 }
                 else if (PartGologram != null)
                 {
+
                     PartGologram.transform.position = GologramHolder.transform.position;
                     PartGologram.transform.rotation = Quaternion.Euler(Xrot, Yrot, Zrot);
+                }
+            }
+            else if (heldItem.CompareTag("Wire"))
+            {
+                Ray ray = new Ray(cameraHolder.position, cameraHolder.forward);
+                if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
+                {
+                    if (Input.GetMouseButtonDown(1))
+                    { 
+                        if (WirePointA == Vector3.zero)
+                        {
+                            if (hit.transform.CompareTag("Connector"))
+                            {
+
+                                WirePointA = hit.collider.bounds.center;
+                                helderA = hit.transform.gameObject;
+                            }
+                            else
+                            {
+                                WirePointA = hit.point + new Vector3(0f, 0.01f , 0f);
+                            }
+                            
+                        }
+                        else
+                        {
+                            GameObject LineObj = new GameObject("Wire");
+                            if (hit.transform.CompareTag("Connector"))
+                            {
+                                WirePointB = hit.transform.position;
+                                helderB = hit.transform.gameObject;
+                            }
+                            else
+                            {
+                                WirePointB = hit.point + new Vector3(0f, 0.01f, 0f);
+                            }
+
+
+                            
+
+                            LineObj.transform.position = (WirePointA + WirePointB) / 2f;
+                            LineObj.tag = "Connector";
+
+                            LineRenderer line;
+                            WireScript wire;
+
+                            wire = LineObj.AddComponent<WireScript>();
+                            line = LineObj.AddComponent<LineRenderer>();
+
+                            line.positionCount = 2;
+                            line.startWidth = 0.05f;
+                            line.endWidth = 0.05f;
+                            line.material = new Material(Shader.Find("Sprites/Default"));
+                            line.startColor = Color.black;
+                            line.endColor = Color.black;
+                            line.SetPosition(0, WirePointA);
+                            line.SetPosition(1, WirePointB);
+
+                            wire.PosA = WirePointA;
+                            wire.PosB = WirePointB;
+                            wire.boxA = helderA;
+                            wire.boxB = helderB;
+
+                            helderA = null;
+                            helderB = null;
+
+                            WirePointA = Vector3.zero;
+                            WirePointB = Vector3.zero;
+                            line = null;
+                            LineObj = null;
+                        }
+                    }
                 }
             }
         }
@@ -237,7 +434,7 @@ public class ItemScript : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
             {
                 Debug.Log(hit.transform);
-                if (hit.collider.CompareTag("Item") || hit.collider.CompareTag("Pistol") || hit.collider.CompareTag("screw") || hit.collider.CompareTag("Part"))
+                if (hit.collider.CompareTag("Item") || hit.collider.CompareTag("Pistol") || hit.collider.CompareTag("screw") || hit.collider.CompareTag("Part") || hit.collider.CompareTag("Wire"))
                 {
 
                     heldItem = hit.collider.gameObject;

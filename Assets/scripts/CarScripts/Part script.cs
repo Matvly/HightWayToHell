@@ -9,15 +9,17 @@ public class Partscript : MonoBehaviour
     [SerializeField] private float health;
     [SerializeField] private float maxHealth;
     [SerializeField] private GameObject collisionReflex;
-
+    [SerializeField] private float linearDamageLimitter = 1;
     public GameObject[] Holes => holes;
+
+    private float linearDamageLimitter2X;
 
     private Rigidbody rb;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
-        
+        linearDamageLimitter2X = linearDamageLimitter * 2;
     }
 
     private void Update()
@@ -37,7 +39,7 @@ public class Partscript : MonoBehaviour
     {
         if (collision.transform.GetComponent<Rigidbody>() != null && rb != null)
         {
-            if (rb.linearVelocity.magnitude + collision.transform.GetComponent<Rigidbody>().linearVelocity.magnitude >= 2)
+            if (rb.linearVelocity.magnitude + collision.transform.GetComponent<Rigidbody>().linearVelocity.magnitude >= linearDamageLimitter2X)
             {
                 foreach (ContactPoint contact in collision.contacts)
                 {
@@ -59,7 +61,7 @@ public class Partscript : MonoBehaviour
         }
         else
         {
-            if (rb.linearVelocity.magnitude >= 1)
+            if (rb.linearVelocity.magnitude >= linearDamageLimitter)
             {
                 foreach (ContactPoint contact in collision.contacts)
                 {

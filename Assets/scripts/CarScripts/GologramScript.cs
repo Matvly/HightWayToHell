@@ -15,7 +15,7 @@ public class GologramScript : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
-
+        Debug.Log("TriggerEnter");
 
         if (!intersections.Contains(other.gameObject))
         {
@@ -25,6 +25,7 @@ public class GologramScript : MonoBehaviour
 
     public void OnTriggerExit(Collider other)
     {
+        Debug.Log("TriggerExt");
         if (intersections.Contains(other.gameObject))
         {
             intersections.Remove(other.gameObject);
@@ -33,12 +34,12 @@ public class GologramScript : MonoBehaviour
 
     public bool GetPermissonToPlace()
     {
-
         
+     
         foreach (GameObject part in intersections)
         {
-            Debug.Log(part);
-            if (part.tag != "Hands" && part.tag != "screw" && part.tag != "Meshes" && part.tag != "hole")
+            
+            if (!part.CompareTag("Hands") && !part.CompareTag("screw") && !part.CompareTag("Meshes") && !part.CompareTag("hole"))
             {
                 
                 return false;
@@ -47,6 +48,10 @@ public class GologramScript : MonoBehaviour
         
         return true;
 
+    }
+    private void Update()
+    {
+        
     }
 
 
