@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -86,20 +87,16 @@ public class PlayerController : MonoBehaviour
         Vector3 targetPos = cameraHolder.position + cameraHolder.TransformDirection(handsOffset);
 
     
-        Hands.transform.position = Vector3.Lerp(
-            Hands.transform.position,
-            targetPos,
-            Time.deltaTime * handsFollowSpeed
-        );
-
+       Hands.transform.position = targetPos;
  
         Quaternion targetRot = cameraHolder.rotation;
+        Hands.transform.DORotateQuaternion(targetRot, handsRotateSpeed)
+                 .SetEase(Ease.InOutQuad);
 
-
-        Hands.transform.rotation = Quaternion.Slerp(
-            Hands.transform.rotation,
-            targetRot,
-            Time.deltaTime * handsRotateSpeed
-        );
+        //Hands.transform.rotation = Quaternion.Slerp(
+        //    Hands.transform.rotation,
+        //    targetRot,
+        //    Time.deltaTime * handsRotateSpeed
+        //);
     }
 }

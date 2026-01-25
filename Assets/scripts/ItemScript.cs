@@ -221,9 +221,9 @@ public class ItemScript : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if (heldItem == null && nearbyItem != null)
+            if (heldItem == null)
             {
-                PickupFromTrigger(nearbyItem);
+                Pickup();
             }
         }
 

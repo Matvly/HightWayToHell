@@ -5,7 +5,7 @@ using UnityEngine;
 public class HelicopterScript : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    private bool locking = false;
+    private bool locking = true;
     public Transform targetPosition1;
     public Transform targetPosition2;
     public Transform player;
