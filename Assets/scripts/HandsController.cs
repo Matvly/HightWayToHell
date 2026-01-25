@@ -11,6 +11,8 @@ public class HandsController : MonoBehaviour
     [SerializeField] private Transform MainRighthand;
     [SerializeField] private Transform hands;
 
+    public Transform WeaponAnchor;
+
     public Transform LeftHand => leftHand;
     public Transform RightHand => rightHand;
     public Transform MainLeftHand => MainLefthand;

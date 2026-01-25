@@ -7,14 +7,23 @@ using UnityEngine.UIElements;
 using TMPro;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class ItemScript : MonoBehaviour
 {
+    public static ItemScript Instance;
+
+
     private Vector3 WirePointA = Vector3.zero;
     private Vector3 WirePointB = Vector3.zero;
 
     private GameObject helderA;
     private GameObject helderB;
+
+    public GameObject pickupHintUI;
+    private CanvasGroup pickupCG;
+    private Tween fadeTween;
+    private GameObject nearbyItem;
 
     public Camera playerCamera;
     public Transform cameraHolder;
@@ -22,17 +31,17 @@ public class ItemScript : MonoBehaviour
     public float pickupRange = 2f;
 
     public TextMeshProUGUI ItemStateText;
-    [Header("Голоограми")]
+    [Header("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ")]
     public Material GologramMaterial;
     public Material GologramRedMaterial;
     public GameObject GologramHolder;
 
 
-    [Header("Позиция и поворот для пистолета в руках")]
+    [Header("пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ")]
     public Vector3 pistolLocalPosition;
     public Vector3 pistolLocalRotation;
 
-    [Header("Позиция и поворот рук при пистолете")]
+    [Header("пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ")]
     public Vector3 rightHandLocalPosition;
     public Vector3 leftHandLocalPosition;
     public Vector3 rightHandLocalRotation;
@@ -62,8 +71,23 @@ public class ItemScript : MonoBehaviour
 
 
     private int CurrentScrew = 0;
+
+    public void Awake()
+    {
+        Instance = this;
+
+       
+    }
+
+    private void Start()
+    {
+        pickupCG = pickupHintUI.GetComponent<CanvasGroup>();
+
+        pickupCG.alpha = 0f;
+    }
     private void Update()
     {
+
 
 
 
@@ -88,7 +112,7 @@ public class ItemScript : MonoBehaviour
 
                 }
             } 
-            // Якщо новий об’єкт
+            // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅб’єпїЅпїЅ
             if (currentTarget != target && !target.CompareTag("Unlined") && Doing && !target.CompareTag("Part"))
             {
                 
@@ -100,7 +124,7 @@ public class ItemScript : MonoBehaviour
                     if (oldOutline != null) Destroy(oldOutline);
                 }
 
-                // Додаємо обводку новому
+                // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
                 Outline outline = target.AddComponent<Outline>();
                 outline.OutlineColor = Color.black;
                 outline.OutlineWidth = 5;
@@ -108,13 +132,13 @@ public class ItemScript : MonoBehaviour
 
 
                 currentTarget = target;
-                // Прибираємо обводку з попереднього
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
             }
         }
         else
         {
-            // Якщо нічого не влучило — прибираємо обводку
+            // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             if (currentTarget != null)
             {
                 Outline oldOutline = currentTarget.GetComponent<Outline>();
@@ -167,6 +191,7 @@ public class ItemScript : MonoBehaviour
         }
         
 
+
             float scroll = Input.GetAxis("Mouse ScrollWheel");
 
         if (Input.GetKeyDown(KeyCode.Y))
@@ -196,8 +221,10 @@ public class ItemScript : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if (heldItem == null)
-                Pickup();
+            if (heldItem == null && nearbyItem != null)
+            {
+                PickupFromTrigger(nearbyItem);
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.G))
@@ -222,7 +249,17 @@ public class ItemScript : MonoBehaviour
 
         }
 
+        void LateUpdate()
+        {
+            if (heldItem != null && heldItem.CompareTag("Pistol"))
+            {
+                handsController.MainLeftHand.localPosition = leftHandLocalPosition;
+                handsController.MainRightHand.localPosition = rightHandLocalPosition;
 
+                handsController.MainLeftHand.localEulerAngles = leftHandLocalRotation;
+                handsController.MainRightHand.localEulerAngles = rightHandLocalRotation;
+            }
+        }
 
         if (PartGologram == null && heldItem != null && heldItem.CompareTag("Part"))
         {
@@ -241,6 +278,7 @@ public class ItemScript : MonoBehaviour
 
 
 
+
             foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
             {
                 if (renderer != null)
@@ -253,10 +291,10 @@ public class ItemScript : MonoBehaviour
             rb.detectCollisions = false;
 
         }
-        if (PartGologram != null) 
+        if (PartGologram != null)
         {
 
-            
+
             if (!PartGologram.GetComponent<GologramScript>().GetPermissonToPlace())
             {
                 foreach (Renderer renderer in PartGologram.transform.Find("Meshes").GetComponentsInChildren<Renderer>())
@@ -438,7 +476,7 @@ public class ItemScript : MonoBehaviour
                 {
 
                     heldItem = hit.collider.gameObject;
-                    
+
                     Rigidbody rb = heldItem.GetComponent<Rigidbody>();
                     if (rb == null && hit.collider.CompareTag("Part"))
                     {
@@ -463,7 +501,7 @@ public class ItemScript : MonoBehaviour
 
                     if (hit.collider.CompareTag("Pistol") || hit.transform.CompareTag("Pistol"))
                     {
-                        
+
                         HandsController controller = handsController.GetComponent<HandsController>();
                         hit.collider.GetComponent<Weapon>().Hands = controller;
                         hit.collider.GetComponent<Weapon>().playerCamera = playerCamera;
@@ -479,11 +517,11 @@ public class ItemScript : MonoBehaviour
 
 
 
-                        // Настройка рук
+                        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
                         handsController.MainLeftHand.localPosition = leftHandLocalPosition;
-                        handsController.MainRightHand.localPosition = defRightHandPos;
+                        handsController.MainRightHand.localPosition = rightHandLocalPosition;
                         handsController.MainLeftHand.localEulerAngles = leftHandLocalRotation;
-                        handsController.MainRightHand.localEulerAngles = defRightHandRotation;
+                        handsController.MainRightHand.localEulerAngles = rightHandLocalRotation;
 
                     }
                     else if (hit.collider.CompareTag("Part"))
@@ -494,18 +532,37 @@ public class ItemScript : MonoBehaviour
 
                         heldItem.AddComponent<GologramScript>();
 
-                        // Настройка рук
+                        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
 
                     }
                     else
                     {
-                        // Обычный предмет
+                        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                         heldItem.transform.localPosition = Vector3.forward * 1f;
                         heldItem.transform.localRotation = Quaternion.identity;
                     }
                 }
             }
         }
+
+   void CheckForPickupAfterDrop()
+{
+    Ray ray = new Ray(cameraHolder.position, cameraHolder.forward);
+
+    if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
+    {
+        if (hit.collider.CompareTag("Item") ||
+            hit.collider.CompareTag("Pistol") ||
+            hit.collider.CompareTag("screw") ||
+            hit.collider.CompareTag("Part"))
+        {
+            SetNearbyItem(hit.collider.gameObject);
+            return;
+        }
+    }
+
+    HidePickupHint();
+}
 
         void Drop()
         {
@@ -525,6 +582,12 @@ public class ItemScript : MonoBehaviour
                 rb.AddForce(cameraHolder.forward * 6f, ForceMode.Impulse);
             }
 
+            handsController.MainLeftHand.localPosition = defLeftHandPos;
+            handsController.MainRightHand.localPosition = defRightHandPos;
+
+            handsController.MainLeftHand.localEulerAngles = defLeftHandRotation;
+            handsController.MainRightHand.localEulerAngles = defRightHandRotation;
+
             heldItem = null;
 
             HandsController controller = handsController.GetComponent<HandsController>();
@@ -534,7 +597,7 @@ public class ItemScript : MonoBehaviour
                 Debug.Log("Ended");
 
             }
-
+            CheckForPickupAfterDrop();
 
         }
 
@@ -586,7 +649,7 @@ public class ItemScript : MonoBehaviour
 
         void AplyPart()
         {
-            
+
             heldItem.transform.SetParent(null);
 
             Rigidbody rb = heldItem.GetComponent<Rigidbody>();
@@ -599,15 +662,15 @@ public class ItemScript : MonoBehaviour
                 }
                 else
                 {
-                    
+
                     Destroy(rb);
                     //Destroy(heldItem.GetComponent<Partscript>());
                 }
 
-                
 
 
-                
+
+
 
                 //HoveredScrew.GetComponent<Collider>().isTrigger = true;
 
@@ -615,7 +678,7 @@ public class ItemScript : MonoBehaviour
                 heldItem.transform.position = PartGologram.transform.position;
                 heldItem.transform.rotation = PartGologram.transform.rotation;
                 heldItem.transform.SetParent(HoveredScrew);
-                
+
                 HoveredScrew = null;
 
             }
@@ -634,13 +697,87 @@ public class ItemScript : MonoBehaviour
                 Debug.Log("Ended");
 
             }
-            
-            
-
-
-
-
 
         }
     }
+
+    void ShowPickupHint()
+    {
+        pickupHintUI.SetActive(true);
+
+        fadeTween?.Kill();
+        pickupCG.alpha = 0f;
+
+        fadeTween = pickupCG.DOFade(1f, 0.75f);
+    }
+
+    void HidePickupHint()
+    {
+        fadeTween?.Kill();
+
+        fadeTween = pickupCG
+            .DOFade(0f, 0.75f)
+            .OnComplete(() =>
+            {
+                pickupHintUI.SetActive(false);
+            });
+    }
+
+    public void SetNearbyItem(GameObject item)
+    {
+        nearbyItem = item;
+
+        ShowPickupHint();
+    }
+
+    public void ClearNearbyItem(GameObject item)
+    {
+        if (nearbyItem == item)
+        {
+            nearbyItem = null;
+
+            HidePickupHint();
+        }
+    }
+
+    void PickupFromTrigger(GameObject item)
+    {
+        heldItem = item;
+
+        Rigidbody rb = heldItem.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.detectCollisions = false;
+        }
+
+        heldItem.transform.SetParent(handsController.transform);
+
+        if (heldItem.CompareTag("Pistol"))
+        {
+            HandsController controller = handsController;
+
+            Weapon weapon = heldItem.GetComponent<Weapon>();
+            weapon.Hands = controller;
+            weapon.playerCamera = playerCamera;
+
+            controller.Anim.SetTrigger("Start");
+
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+            heldItem.transform.localPosition = pistolLocalPosition;
+            heldItem.transform.localEulerAngles = pistolLocalRotation;
+
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
+            handsController.MainLeftHand.localPosition = leftHandLocalPosition;
+            handsController.MainRightHand.localPosition = rightHandLocalPosition;
+
+            handsController.MainLeftHand.localEulerAngles = leftHandLocalRotation;
+            handsController.MainRightHand.localEulerAngles = rightHandLocalRotation;
+        }
+
+
+        pickupHintUI.SetActive(false);
+        nearbyItem = null;
+    }
+
 }
